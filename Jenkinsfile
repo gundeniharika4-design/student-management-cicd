@@ -10,10 +10,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                bat '''
-                    "C:\Users\HP\AppData\Local\Programs\Python\Python313\python.exe" -m venv .venv
-                    .venv\\Scripts\\python.exe -m pip install -r requirements.txt
-                '''
+                bat '.venv\\Scripts\\python.exe -m pytest -v'
             }
         }
 
