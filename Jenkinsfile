@@ -8,22 +8,48 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Install Dependencies') {
             steps {
-                echo 'Building Student Management System'
+                bat '''
+                    python -m venv .venv
+                    .venv\\Scripts\\python.exe -m pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Test') {
             steps {
-                bat '"C:\\Users\\HP\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m pytest test_app.py -v'
+                bat '.venv\\Scripts\\python.exe -m pytest -v'
             }
         }
 
-        stage('Deploy') {
+        stage('Run Application') {
             steps {
-                echo 'Student Management System deployment completed'
+                bat '.venv\\Scripts\\python.exe app.py'
             }
+        }
+
+        stage('Package Release') {
+            steps {
+                bat '''
+                    if not exist release mkdir release
+                    copy /Y app.py release\\app.py
+                    copy /Y requirements.txt release\\requirements.txt
+                '''
+
+                archiveArtifacts artifacts: 'release/**',
+                                 fingerprint: true
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'SUCCESS: All stages completed.'
+        }
+
+        failure {
+            echo 'FAILED: Check Console Output.'
         }
     }
 }
